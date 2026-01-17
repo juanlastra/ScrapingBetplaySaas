@@ -8,9 +8,6 @@ La aplicación trabaja con el link del evento y aparti de ahí permite recopilar
 
 ![Resultados de la App](img/img2.png)
 
-A continuación te propongo un **texto descriptivo, claro y formal**, adecuado para acompañar o presentar la información mostrada en el panel (por ejemplo, como explicación del dashboard, sección “Descripción” o introducción funcional).
-
----
 
 El panel de control presenta un seguimiento en tiempo real de un evento deportivo obtenido mediante un proceso automatizado de scraping. En la parte superior se muestra el marcador del partido en curso, indicando el período de juego, el minuto actual y el estado del encuentro. Se visualiza el resultado parcial entre el equipo local y el visitante, junto con estadísticas clave del desarrollo del partido, como goles, tiros de esquina, tarjetas amarillas y tarjetas rojas, lo que permite una lectura inmediata de la dinámica del juego.
 

@@ -45,8 +45,8 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null
 
   return (
-    <div className="bg-white border rounded-lg shadow px-3 py-2 text-sm">
-      <p className="font-semibold text-gray-700 mb-1">{label}</p>
+    <div className="bg-white border border-slate-200 rounded-lg shadow px-3 py-2 text-sm">
+      <p className="font-semibold text-slate-700 mb-1">{label}</p>
       {payload.map((item: any) => (
         <p key={item.dataKey} style={{ color: item.stroke }}>
           {item.name}: {item.value.toFixed(2)}
@@ -56,11 +56,11 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   )
 }
 
-/* ─────────────────── FORMATEO DEL EJE X ─────────────────── */
+/* ─────────────────── FORMATO EJE X ─────────────────── */
 
 const formatTimeForXAxis = (tiempo: string) => {
   const match = tiempo.match(/(\d+):(\d+)/)
-  if (match) return parseInt(match[1], 10) // solo minutos
+  if (match) return parseInt(match[1], 10)
   return tiempo
 }
 
@@ -120,22 +120,44 @@ export default function SeriesCuotasLive() {
     return () => clearInterval(interval)
   }, [])
 
-  /* ─────────────────── RENDER DE CADA GRÁFICO ─────────────────── */
+  /* ─────────────────── RENDER DE GRÁFICO ─────────────────── */
 
   const renderChart = (data: SnapshotResultado[]) => (
-    <ResponsiveContainer width="100%" height={360}>
-      <LineChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 30 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+    <ResponsiveContainer width="100%" height={330}>
+      <LineChart
+        data={data}
+        margin={{ top: 20, right: 24, left: 10, bottom: 40 }}
+      >
+        <CartesianGrid stroke="#e5e7eb" strokeDasharray="2 2" />
 
         <XAxis
           dataKey="tiempo"
-          tick={{ fontSize: 12 }}
+          tick={{ fontSize: 12, fill: "#475569" }}
           tickFormatter={formatTimeForXAxis}
-          height={40}
-          interval="preserveStartEnd"
+          axisLine={{ stroke: "#cbd5f5" }}
+          tickLine={{ stroke: "#cbd5f5" }}
+          label={{
+            value: "Minuto de juego",
+            position: "insideBottom",
+            offset: -25,
+            fill: "#475569",
+            fontSize: 12,
+          }}
         />
 
-        <YAxis tick={{ fontSize: 12 }} />
+        <YAxis
+          tick={{ fontSize: 12, fill: "#475569" }}
+          axisLine={{ stroke: "#cbd5f5" }}
+          tickLine={{ stroke: "#cbd5f5" }}
+          label={{
+            value: "Cuota",
+            angle: -90,
+            position: "insideLeft",
+            offset: -5,
+            fill: "#475569",
+            fontSize: 12,
+          }}
+        />
 
         <Tooltip content={<CustomTooltip />} />
 
@@ -174,17 +196,17 @@ export default function SeriesCuotasLive() {
   )
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 w-full">
-      <div className="bg-white rounded-2xl shadow-md p-5">
-        <h2 className="text-lg font-semibold mb-3 text-gray-800">
-          📈 Evolución de Cuotas – Tiempo Reglamentario
+    <div className="grid grid-cols-1 xl:grid-cols-2 gap-2 w-full">
+      <div className="bg-white rounded-xl shadow p-4">
+        <h2 className="text-lg font-semibold mb-2 text-slate-800">
+          Evolución de Cuotas – Tiempo Reglamentario
         </h2>
         {renderChart(resultadoSeries)}
       </div>
 
-      <div className="bg-white rounded-2xl shadow-md p-5">
-        <h2 className="text-lg font-semibold mb-3 text-gray-800">
-          📊 Evolución de Cuotas – Mayoría de Corners
+      <div className="bg-white rounded-xl shadow p-4">
+        <h2 className="text-lg font-semibold mb-2 text-slate-800">
+          Evolución de Cuotas – Mayoría de Corners
         </h2>
         {renderChart(cornersSeries)}
       </div>

@@ -15,7 +15,9 @@ export default function LinkUploader({
 }: Props) {
   const [open, setOpen] = useState(false)
   const [link, setLink] = useState("")
-  const [interval, setInterval] = useState(1)
+
+  // Intervalo fijo: 30 segundos = 0.5 minutos
+  const interval = 1
 
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
@@ -79,24 +81,6 @@ export default function LinkUploader({
           />
         </div>
       )}
-
-      <div>
-        <label className="block text-sm font-medium mb-2 text-black">
-          Intervalo en minutos
-        </label>
-        <select
-          value={interval}
-          disabled={scrapingStarted}
-          onChange={(e) => setInterval(Number(e.target.value))}
-          className="w-full rounded-lg px-3 py-2 text-black disabled:opacity-50"
-        >
-          {Array.from({ length: 20 }, (_, i) => i + 1).map((min) => (
-            <option key={min} value={min}>
-              {min} minutos
-            </option>
-          ))}
-        </select>
-      </div>
 
       {!scrapingStarted ? (
         <button

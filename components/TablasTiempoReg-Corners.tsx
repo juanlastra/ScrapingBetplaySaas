@@ -10,68 +10,73 @@ type CuotaItem = {
 }
 
 type ResultadoRow = {
-  index: number
-  local: number
-  empate: number
-  visitante: number
+  local: number | null
+  empate: number | null
+  visitante: number | null
+  tiempo: string | null
+  goles: string | null
 }
 
 type TiroEsquinaItem = {
-  local: CuotaItem
-  empate: CuotaItem
-  visitante: CuotaItem
+  local: CuotaItem | null
+  empate: CuotaItem | null
+  visitante: CuotaItem | null
+}
+
+type MarcadorAPI = {
+  tiempo: string
+  local: { stats: { goles: number } }
+  visitante: { stats: { goles: number } }
 }
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"
 
+type Props = {
+  sessionKey: number
+}
+
 /* ─────────────────── COMPONENTE ─────────────────── */
 
-export default function MercadosPrincipalesPanel() {
-  /* -------- Tiempo reglamentario -------- */
-  const [resultadoRows, setResultadoRows] = useState<ResultadoRow[]>([])
-  const [headers, setHeaders] = useState<{
-    local: string
-    visitante: string
-  } | null>(null)
+export default function MercadosPrincipalesPanel({ sessionKey }: Props) {
+  const MAX_ROWS = 7
 
-  /* -------- Tiros de esquina -------- */
+  const [resultadoRows, setResultadoRows] = useState<ResultadoRow[]>([])
   const [cornersRows, setCornersRows] = useState<TiroEsquinaItem[]>([])
+  const [hasData, setHasData] = useState(false)
 
   /* ─────────────────── FETCHERS ─────────────────── */
 
   const fetchResultadoTiempo = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/resultado-tiempo`)
-      const data: CuotaItem[][] = await res.json()
+      const [resCuotas, resMarcador] = await Promise.all([
+        fetch(`${API_URL}/api/resultado-tiempo`),
+        fetch(`${API_URL}/api/marcador`),
+      ])
 
-      if (!Array.isArray(data)) return
+      const cuotas: CuotaItem[][] = await resCuotas.json()
+      const marcador: MarcadorAPI | null = await resMarcador.json()
 
-      const validSnapshots = data.filter(
-        snap => Array.isArray(snap) && snap.length === 3
-      )
+      if (!Array.isArray(cuotas) || cuotas.length === 0 || !marcador) return
 
-      if (validSnapshots.length === 0) return
+      const snap = cuotas[cuotas.length - 1]
+      if (!Array.isArray(snap) || snap.length !== 3) return
 
-      if (!headers) {
-        setHeaders({
-          local: validSnapshots[0][0].equipo,
-          visitante: validSnapshots[0][2].equipo,
-        })
+      const nuevaFila: ResultadoRow = {
+        local: snap[0].cuota,
+        empate: snap[1].cuota,
+        visitante: snap[2].cuota,
+        tiempo: marcador.tiempo,
+        goles: `${marcador.local.stats.goles}-${marcador.visitante.stats.goles}`,
       }
 
-      const parsed: ResultadoRow[] = validSnapshots.map(
-        (snap, index) => ({
-          index,
-          local: snap[0].cuota,
-          empate: snap[1].cuota,
-          visitante: snap[2].cuota,
-        })
+      setResultadoRows(prev =>
+        [...prev, nuevaFila].slice(-MAX_ROWS)
       )
 
-      setResultadoRows(parsed)
-    } catch (err) {
-      console.error("Error resultado tiempo reglamentario:", err)
+      setHasData(true)
+    } catch {
+      setHasData(false)
     }
   }
 
@@ -80,159 +85,144 @@ export default function MercadosPrincipalesPanel() {
       const res = await fetch(`${API_URL}/api/tiros-esquina`)
       const json = await res.json()
 
-      if (Array.isArray(json)) {
-        setCornersRows(json)
-      }
-    } catch (err) {
-      console.error("Error tiros de esquina:", err)
+      if (!Array.isArray(json)) return
+
+      setCornersRows(prev =>
+        [...prev, json[json.length - 1]].slice(-MAX_ROWS)
+      )
+
+      setHasData(true)
+    } catch {
+      setHasData(false)
     }
   }
 
   /* ─────────────────── INTERVALO ─────────────────── */
 
   useEffect(() => {
+    setResultadoRows([])
+    setCornersRows([])
+    setHasData(false)
+
     fetchResultadoTiempo()
     fetchTirosEsquina()
 
     const interval = setInterval(() => {
       fetchResultadoTiempo()
       fetchTirosEsquina()
-    }, 30_000)
+    }, 60_000)
 
     return () => clearInterval(interval)
-  }, [])
+  }, [sessionKey])
 
   /* ─────────────────── HELPERS ─────────────────── */
 
-  const resultadoVisible = resultadoRows.slice(-5)
-  const cornersVisible = cornersRows.slice(-5)
+  const fillResultado = [...resultadoRows]
+  while (fillResultado.length < MAX_ROWS) {
+    fillResultado.unshift({
+      local: null,
+      empate: null,
+      visitante: null,
+      tiempo: null,
+      goles: null,
+    })
+  }
 
-  const format = (n: number) => n.toFixed(1)
+  const fillCorners = [...cornersRows]
+  while (fillCorners.length < MAX_ROWS) {
+    fillCorners.unshift({
+      local: null,
+      empate: null,
+      visitante: null,
+    })
+  }
+
+  const format = (n: number | null) =>
+    n === null ? "" : n.toFixed(2)
 
   /* ─────────────────── UI ─────────────────── */
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-      {/* ─────────── TIEMPO REGLAMENTARIO ─────────── */}
-      <div className="bg-white rounded shadow p-4">
-        <h2 className="text-lg font-semibold mb-3 text-black">
-          🏆 Ganador en Tiempo Reglamentario
-        </h2>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 w-full min-h-[360px]">
+      {/* ───────── TIEMPO REGLAMENTARIO ───────── */}
+      <div className="bg-white rounded shadow p-4 flex flex-col">
 
-        <div className="overflow-y-auto">
-          <table className="w-full border-collapse table-fixed">
-            <thead className="bg-slate-200">
-              <tr className="text-black">
-                <th className="p-2 w-1/3">
-                  {headers?.local ?? "Local"}
-                </th>
-                <th className="p-2 w-1/3">Empate</th>
-                <th className="p-2 w-1/3">
-                  {headers?.visitante ?? "Visitante"}
-                </th>
-              </tr>
-            </thead>
+        <h2 className="text-lg font-semibold text-blue-900 mb-4 flex items-center gap-2">
+  <span className="h-4 w-1 bg-blue-700 rounded-sm"></span>
+  Ganador en Tiempo Reglamentario
+</h2>
 
-            <tbody>
-              {resultadoVisible.map((row, idx) => {
-                const isLastTwo =
-                  idx >= resultadoVisible.length - 2
 
-                return (
-                  <tr
-                    key={row.index}
-                    className={`border-b last:border-0 ${
-                      isLastTwo
-                        ? "bg-sky-200/60 font-semibold"
-                        : ""
-                    }`}
-                  >
-                    <td className="p-2 text-black">
-                      {format(row.local)}
-                    </td>
-                    <td className="p-2 text-black">
-                      {format(row.empate)}
-                    </td>
-                    <td className="p-2 text-black">
-                      {format(row.visitante)}
-                    </td>
-                  </tr>
-                )
-              })}
-
-              {resultadoVisible.length === 0 && (
+        <div className="h-[280px] flex items-center justify-center relative top-[-10px]">
+          {!hasData ? (
+            <div className="text-slate-500">Sin datos disponibles</div>
+          ) : (
+            <table className="w-full table-fixed text-black">
+              <thead className="bg-slate-200">
                 <tr>
-                  <td
-                    colSpan={3}
-                    className="p-4 text-center text-slate-500"
-                  >
-                    Sin datos disponibles
-                  </td>
+                  <th className="text-center">Tiempo</th>
+                  <th className="text-center">Local</th>
+                  <th className="text-center">Empate</th>
+                  <th className="text-center">Visitante</th>
+                  <th className="text-center">Goles</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {fillResultado.map((r, i) => (
+                  <tr key={i} className="border-b last:border-0">
+                    <td className="text-center">{r.tiempo ?? ""}</td>
+                    <td className="text-center">{format(r.local)}</td>
+                    <td className="text-center">{format(r.empate)}</td>
+                    <td className="text-center">{format(r.visitante)}</td>
+                    <td className="text-center">{r.goles ?? ""}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
 
-      {/* ─────────── TIROS DE ESQUINA ─────────── */}
-      <div className="bg-white rounded shadow p-4">
-        <h2 className="text-lg font-semibold mb-3 text-black">
-          🚩 Dominio en Tiros de Esquina
-        </h2>
+      {/* ───────── TIROS DE ESQUINA ───────── */}
+      <div className="bg-white rounded shadow p-4 flex flex-col">
+<h2 className="text-lg font-semibold text-blue-900 mb-4 flex items-center gap-2">
+  <span className="h-4 w-1 bg-blue-700 rounded-sm"></span>
+  Dominio en Tiros de Esquina
+</h2>
 
-        <div className="overflow-y-auto">
-          <table className="w-full border-collapse table-fixed">
-            <thead className="bg-slate-200">
-              <tr className="text-black">
-                <th className="p-2 w-1/3">Local</th>
-                <th className="p-2 w-1/3">Empate</th>
-                <th className="p-2 w-1/3">Visitante</th>
-              </tr>
-            </thead>
 
-            <tbody>
-              {cornersVisible.map((row, idx) => {
-                const isLastTwo =
-                  idx >= cornersVisible.length - 2
 
-                return (
-                  <tr
-                    key={idx}
-                    className={`border-b last:border-0 ${
-                      isLastTwo
-                        ? "bg-sky-200/60 font-semibold"
-                        : ""
-                    }`}
-                  >
-                    <td className="p-2 text-black">
-                      {format(row.local.cuota)}
+        <div className="h-[280px] flex items-center justify-center relative top-[-10px]">
+          {!hasData ? (
+            <div className="text-slate-500">Sin datos disponibles</div>
+          ) : (
+            <table className="w-full table-fixed text-black">
+              <thead className="bg-slate-200">
+                <tr>
+                  <th className="text-center">Local</th>
+                  <th className="text-center">Empate</th>
+                  <th className="text-center">Visitante</th>
+                </tr>
+              </thead>
+              <tbody>
+                {fillCorners.map((r, i) => (
+                  <tr key={i} className="border-b last:border-0">
+                    <td className="text-center">
+                      {r.local?.cuota?.toFixed(2) ?? ""}
                     </td>
-                    <td className="p-2 text-black">
-                      {format(row.empate.cuota)}
+                    <td className="text-center">
+                      {r.empate?.cuota?.toFixed(2) ?? ""}
                     </td>
-                    <td className="p-2 text-black">
-                      {format(row.visitante.cuota)}
+                    <td className="text-center">
+                      {r.visitante?.cuota?.toFixed(2) ?? ""}
                     </td>
                   </tr>
-                )
-              })}
-
-              {cornersVisible.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={3}
-                    className="p-4 text-center text-slate-500"
-                  >
-                    Sin datos disponibles
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </div>
   )
 }
-

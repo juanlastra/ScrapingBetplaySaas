@@ -27,7 +27,11 @@ type Marcador = {
   visitante: Equipo
 }
 
-export default function MarcadorLive() {
+type Props = {
+  sessionKey: number
+}
+
+export default function MarcadorLive({ sessionKey }: Props) {
   const [marcador, setMarcador] = useState<Marcador | null>(null)
 
   const fetchMarcador = () => {
@@ -43,10 +47,14 @@ export default function MarcadorLive() {
   }
 
   useEffect(() => {
+    // Nueva sesión de scraping → limpiar y mostrar "Cargando..."
+    setMarcador(null)
+
     fetchMarcador()
     const interval = setInterval(fetchMarcador, 30_000)
+
     return () => clearInterval(interval)
-  }, [])
+  }, [sessionKey])
 
   if (!marcador) {
     return (
@@ -60,7 +68,6 @@ export default function MarcadorLive() {
 
   return (
     <div className="bg-white rounded-xl shadow p-6 w-full h-full flex flex-col">
-      {/* ───────── CABECERA ───────── */}
       <div className="flex items-center justify-between mb-4">
         <span className="text-sm text-slate-500 flex items-center gap-2">
           <Clock size={16} />
@@ -72,7 +79,6 @@ export default function MarcadorLive() {
         </span>
       </div>
 
-      {/* ───────── EQUIPOS / GOLES ───────── */}
       <div className="grid grid-cols-3 items-center mb-6">
         <div className="text-right pr-4">
           <p className="font-semibold text-lg text-black">
@@ -97,51 +103,15 @@ export default function MarcadorLive() {
         </div>
       </div>
 
-      {/* ───────── ESTADÍSTICAS ───────── */}
       <div className="grid grid-cols-3 gap-4 text-sm mt-auto">
-        <StatRow
-          icon={<Goal size={16} />}
-          local={local.stats.goles}
-          label="Goles"
-          visitante={visitante.stats.goles}
-        />
-
-        <StatRow
-          icon={<CornerUpLeft size={16} />}
-          local={local.stats.corner}
-          label="Corners"
-          visitante={visitante.stats.corner}
-        />
-
-        <StatRow
-          icon={
-            <RectangleVertical
-              size={14}
-              className="text-yellow-500"
-            />
-          }
-          local={local.stats.tarjeta_amarilla}
-          label="Amarillas"
-          visitante={visitante.stats.tarjeta_amarilla}
-        />
-
-        <StatRow
-          icon={
-            <RectangleVertical
-              size={14}
-              className="text-red-500"
-            />
-          }
-          local={local.stats.tarjeta_roja}
-          label="Rojas"
-          visitante={visitante.stats.tarjeta_roja}
-        />
+        <StatRow icon={<Goal size={16} />} local={local.stats.goles} label="Goles" visitante={visitante.stats.goles} />
+        <StatRow icon={<CornerUpLeft size={16} />} local={local.stats.corner} label="Corners" visitante={visitante.stats.corner} />
+        <StatRow icon={<RectangleVertical size={14} className="text-yellow-500" />} local={local.stats.tarjeta_amarilla} label="Amarillas" visitante={visitante.stats.tarjeta_amarilla} />
+        <StatRow icon={<RectangleVertical size={14} className="text-red-500" />} local={local.stats.tarjeta_roja} label="Rojas" visitante={visitante.stats.tarjeta_roja} />
       </div>
     </div>
   )
 }
-
-/* ─────────────────── FILA DE ESTADÍSTICA ─────────────────── */
 
 function StatRow({
   icon,

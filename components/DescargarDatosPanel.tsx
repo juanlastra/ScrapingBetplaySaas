@@ -13,8 +13,7 @@ async function fetchSafeJSON(url: string) {
   try {
     const res = await fetch(url)
     if (!res.ok) return null
-    const text = await res.text()
-    return JSON.parse(text)
+    return await res.json()
   } catch {
     return null
   }
@@ -26,28 +25,31 @@ export default function DescargarDatosPanel() {
 
   useEffect(() => {
     const collect = async () => {
-      const [marcadorRes, resultadoRes, cornersRes] =
-        await Promise.all([
-          fetchSafeJSON(`${API_URL}/api/marcador`),
-          fetchSafeJSON(`${API_URL}/api/resultado-tiempo`),
-          fetchSafeJSON(`${API_URL}/api/tiros-esquina`),
-        ])
+      const [marcador, resultadoRes, cornersRes] = await Promise.all([
+        fetchSafeJSON(`${API_URL}/api/marcador`),
+        fetchSafeJSON(`${API_URL}/api/resultado-tiempo`),
+        fetchSafeJSON(`${API_URL}/api/tiros-esquina`),
+      ])
 
-      if (!marcadorRes?.datos?.Marcador) return
+      if (!marcador?.tiempo || !marcador?.local || !marcador?.visitante) {
+        return
+      }
 
-      const m = marcadorRes.datos.Marcador
-      const local = m.local
-      const visitante = m.visitante
+      const local = marcador.local
+      const visitante = marcador.visitante
 
       const ultimoResultado: CuotaItem[] | null =
         Array.isArray(resultadoRes) && resultadoRes.length
           ? resultadoRes.at(-1)
           : null
 
-      const corners = cornersRes?.slice?.(-1)?.[0] ?? null
+      const ultimoCorners =
+        Array.isArray(cornersRes) && cornersRes.length
+          ? cornersRes.at(-1)
+          : null
 
       const row: ExportRow = {
-        "Tiempo partido": `${m.periodo} ${m.tiempo}`,
+        "Tiempo partido": `${marcador.periodo} ${marcador.tiempo}`,
 
         [`Goles ${local.equipo}`]: local.stats.goles,
         [`Goles ${visitante.equipo}`]: visitante.stats.goles,
@@ -72,13 +74,13 @@ export default function DescargarDatosPanel() {
           null,
 
         [`Cuota más corners ${local.equipo}`]:
-          corners?.local?.cuota ?? null,
+          ultimoCorners?.local?.cuota ?? null,
 
         "Cuota empate corners":
-          corners?.empate?.cuota ?? null,
+          ultimoCorners?.empate?.cuota ?? null,
 
         [`Cuota más corners ${visitante.equipo}`]:
-          corners?.visitante?.cuota ?? null,
+          ultimoCorners?.visitante?.cuota ?? null,
       }
 
       dataRef.current.push(row)
@@ -137,7 +139,7 @@ export default function DescargarDatosPanel() {
       </p>
 
       <div className="flex gap-4">
-        {[
+        {[  
           { f: "json", icon: <Braces size={18} />, label: "JSON" },
           { f: "csv", icon: <FileText size={18} />, label: "CSV" },
           { f: "excel", icon: <FileSpreadsheet size={18} />, label: "Excel" },
