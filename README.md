@@ -1,36 +1,21 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ScrapingBetplay
 
-## Getting Started
+Esta es una web simple que recibe un (En un futuro mas links) de un evento en Betplay y permite guardar la información a lo largo del tiempo.
 
-First, run the development server:
+![Pagina donde conseguir el link del evento](img/img1.png)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+La aplicación trabaja con el link del evento y aparti de ahí permite recopilar información a lo largo del tiempo de partido.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+![Resultados de la App](img/img2.png)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+A continuación te propongo un **texto descriptivo, claro y formal**, adecuado para acompañar o presentar la información mostrada en el panel (por ejemplo, como explicación del dashboard, sección “Descripción” o introducción funcional).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+El panel de control presenta un seguimiento en tiempo real de un evento deportivo obtenido mediante un proceso automatizado de scraping. En la parte superior se muestra el marcador del partido en curso, indicando el período de juego, el minuto actual y el estado del encuentro. Se visualiza el resultado parcial entre el equipo local y el visitante, junto con estadísticas clave del desarrollo del partido, como goles, tiros de esquina, tarjetas amarillas y tarjetas rojas, lo que permite una lectura inmediata de la dinámica del juego.
 
-To learn more about Next.js, take a look at the following resources:
+De manera complementaria, el panel incorpora información de mercados de apuestas relevantes. Se presenta la evolución de las cuotas para el mercado de ganador en tiempo reglamentario, desagregada por local, empate y visitante, permitiendo identificar cambios significativos en la percepción del resultado a medida que avanza el partido. Asimismo, se incluye el mercado de dominio en tiros de esquina, mostrando las cuotas correspondientes a cada resultado posible y resaltando los valores más recientes obtenidos por el scraper.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+En la sección inferior, se visualizan gráficos de evolución temporal de las cuotas, tanto para el mercado de tiempo reglamentario como para el de mayoría de corners. Estos gráficos permiten analizar tendencias, saltos abruptos y variaciones asociadas a eventos del partido, facilitando un análisis histórico y comparativo del comportamiento de las cuotas minuto a minuto.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Finalmente, el panel integra un módulo de control del scraping, desde el cual se gestiona el enlace del evento, el intervalo de actualización y el estado del proceso. Se dispone de opciones para detener la extracción de datos y para descargar la información recolectada en distintos formatos, lo que convierte al panel en una herramienta integral para el monitoreo, análisis y explotación de datos en vivo.
