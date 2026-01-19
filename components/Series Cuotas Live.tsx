@@ -58,10 +58,15 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 /* ─────────────────── FORMATO EJE X ─────────────────── */
 
-const formatTimeForXAxis = (tiempo: string) => {
-  const match = tiempo.match(/(\d+):(\d+)/)
-  if (match) return parseInt(match[1], 10)
-  return tiempo
+const formatTimeForXAxis = (value: any): string => {
+  if (typeof value !== "string") return ""
+
+  const match = value.match(/(\d+):(\d+)/)
+  if (match) {
+    return match[1]
+  }
+
+  return value
 }
 
 /* ─────────────────── COMPONENTE ─────────────────── */
