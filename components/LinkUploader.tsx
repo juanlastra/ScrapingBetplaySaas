@@ -27,7 +27,7 @@ export default function LinkUploader({
     setMessage(null)
 
     try {
-      const res = await fetch("http://localhost:8080/api/start-scraping", {
+      const res = await fetch("https://betplayscrapergoservice.onrender.com/api/start-scraping", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: link, interval }),
@@ -48,7 +48,7 @@ export default function LinkUploader({
 
   const stopScraping = async () => {
     try {
-      await fetch("http://localhost:8080/api/stop-scraping", {
+      await fetch("https://betplayscrapergoservice.onrender.com/api/stop-scraping", {
         method: "POST",
       })
       onStop()

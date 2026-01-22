@@ -29,7 +29,7 @@ type SnapshotResultado = {
 type SnapshotCorners = SnapshotResultado
 
 const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"
+  process.env.NEXT_PUBLIC_API_URL || "https://betplayscrapergoservice.onrender.com"
 
 /* ─────────────────── COLORES ─────────────────── */
 
