@@ -29,7 +29,8 @@ type SnapshotResultado = {
 type SnapshotCorners = SnapshotResultado
 
 const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://betplayscrapergoservice.onrender.com"
+  process.env.NEXT_PUBLIC_API_URL ||
+  "https://betplayscrapergoservice.onrender.com"
 
 /* ─────────────────── COLORES ─────────────────── */
 
@@ -58,9 +59,9 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 /* ─────────────────── FORMATO EJE X ─────────────────── */
 
-const formatTimeForXAxis = (tiempo: string) => {
+const formatTimeForXAxis = (tiempo: string): string => {
   const match = tiempo.match(/(\d+):(\d+)/)
-  if (match) return parseInt(match[1], 10)
+  if (match) return match[1] // SIEMPRE string
   return tiempo
 }
 
