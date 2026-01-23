@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { FileSpreadsheet, FileText, Braces } from "lucide-react"
 
 const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"
+  process.env.NEXT_PUBLIC_API_URL || "https://betplayscrapergoservice.onrender.com"
 
 type ExportRow = Record<string, string | number | null>
 type CuotaItem = { equipo: string; cuota: number }

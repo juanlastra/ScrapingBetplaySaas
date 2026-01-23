@@ -17,7 +17,7 @@ export default function DashboardPage() {
   const stopTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   const stopScraping = async () => {
-    await fetch("http://localhost:8080/api/stop-scraping", {
+    await fetch("https://betplayscrapergoservice.onrender.com/api/stop-scraping", {
       method: "POST",
     })
     setScrapingStarted(false)
@@ -34,7 +34,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const handleUnload = () => {
-      navigator.sendBeacon("http://localhost:8080/api/stop-scraping")
+      navigator.sendBeacon("https://betplayscrapergoservice.onrender.com/api/stop-scraping")
     }
     window.addEventListener("beforeunload", handleUnload)
     return () => window.removeEventListener("beforeunload", handleUnload)

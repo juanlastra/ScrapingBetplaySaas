@@ -35,7 +35,7 @@ export default function MarcadorLive({ sessionKey }: Props) {
   const [marcador, setMarcador] = useState<Marcador | null>(null)
 
   const fetchMarcador = () => {
-    fetch("http://localhost:8080/api/marcador")
+    fetch("https://betplayscrapergoservice.onrender.com/api/marcador")
       .then(res => res.json())
       .then(data => {
         if (!data || !data.local || !data.visitante) return
