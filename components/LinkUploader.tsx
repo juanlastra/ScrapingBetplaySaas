@@ -17,7 +17,7 @@ export default function LinkUploader({
   const [link, setLink] = useState("")
 
   // Intervalo fijo: 30 segundos = 0.5 minutos
-  const interval = 1
+  const interval = 30
 
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
